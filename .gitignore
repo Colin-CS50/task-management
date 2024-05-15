@@ -1,6 +1,9 @@
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
 .venv
 
 *.db
-
 init_db.py
-flask_session
+/*_session/
