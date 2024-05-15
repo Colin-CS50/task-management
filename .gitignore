@@ -1,1 +1,6 @@
 .venv
+
+*.db
+
+init_db.py
+flask_session
