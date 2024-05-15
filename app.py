@@ -1,5 +1,5 @@
 from cs50 import SQL
-from flask import Flask, redirect, render_template, session, request, url_for
+from flask import Flask, redirect, render_template, session, request, url_for, abort
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -19,8 +19,8 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///task.db")
 
-def get_user_rows(username):
-    return db.execute("SELECT * FROM users WHERE username = ?", username)
+def get_user_rows(email):
+    return db.execute("SELECT * FROM users WHERE email = ?", email)
 
 @app.route("/")
 @login_required
@@ -31,6 +31,46 @@ def index():
 
     return render_template("index.html", username=username)
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure username was submitted
+        if not request.form.get("email"):
+            return abort(403, description="Must provide email")
+        # print("must provide username", 403)
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return abort(403, description="Must provide password")
+        # print("must provide password", 403)
+
+        # Query database for username
+        rows = get_user_rows(request.form.get("email"))
+
+        print(rows)
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(
+            rows[0]["hash"], request.form.get("password")
+        ):
+            return abort(403, description="Invalid username and/or password")
+        # print("invalid username and/or password", 403)
+
+        # Remember which user has logged in
+        session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -47,11 +87,16 @@ def register():
         if not username:
             return print("Please input a username")
 
-        rows = get_user_rows(username)
+        # Add validation for the email
+        email = request.form.get("email")
+        if not email:
+            return print("Please input a email")
+
+        rows = get_user_rows(email)
 
         # Ensure username does not exists already
-        # if len(rows) == 1:
-        #     return print("User already exists")
+        if len(rows) == 1:
+            return print("User already exists")
 
         # Add validation for the password
         password = request.form.get("password")
@@ -64,10 +109,11 @@ def register():
 
         hashed_password = generate_password_hash(password)
 
-        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, hashed_password)
+        db.execute("INSERT INTO users (username, email, hash) VALUES (?, ?, ?)", username, email, hashed_password)
 
         # Query database for the new username
-        rows = get_user_rows(username)
+        rows = get_user_rows(email)
+        print(rows)
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
