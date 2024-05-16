@@ -6,10 +6,21 @@
 
 {% block main %}
   <p>{{ username }}</p>
+  <form action="/board/create" method="post">
+    <h1>Create a board</h1>
+    <div class="mb-3">
+      <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="name" placeholder="Name" type="text">
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+  </form>
   {% if boards %}
     <ol>
       {% for board in boards %}
-        <li class="text-start"><a href="/">{{ board["id"] }}: {{ board["name"] }}</a></li>
+        <li class="text-start"><a href="{{ url_for('board_detail', id=board.id) }}">{{ board["name"] }}</a></li>
+        <form class="text-start" action="/board/{{ board.id }}/delete" method="post">
+          <input type="hidden" name="_method" value="POST">
+          <button type="submit" class="btn btn-danger">Delete Board</button>
+        </form>
       {% endfor %}
     </ol>
   {% endif %}

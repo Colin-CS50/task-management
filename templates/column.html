@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Column
+{% endblock %}
+
+{% block main %}
+  {% if column %}
+    {{ column["name"] }} {{ column['id'] }}
+  {% endif %}
+{% endblock %}

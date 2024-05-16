@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Boards
+{% endblock %}
+
+{% block main %}
+<form action="/board/create" method="post">
+  <h1>Create a board</h1>
+  <div class="mb-3">
+    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="name" placeholder="Name" type="text">
+  </div>
+  <button class="btn btn-primary" type="submit">Create</button>
+</form>
+{% endblock %}
