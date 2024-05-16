@@ -28,8 +28,28 @@ def index():
     user_id = session["user_id"]
     user = db.execute("SELECT * FROM users WHERE id = ?", user_id)
     username = user[0]["username"].capitalize()
+    boards = db.execute("SELECT * FROM boards WHERE user_id = ?", user_id)
 
-    return render_template("index.html", username=username)
+    return render_template("index.html", username=username, boards=boards)
+
+@app.route("/board", methods=["GET", "POST"])
+@login_required
+def create_board():
+
+    if request.method == "POST":
+
+        # Ensure name exist
+        name = request.form.get("name")
+        if not name:
+            return abort(403, description="Must provide a name")
+
+        db.execute("INSERT INTO boards (name, user_id) VALUES (?, ?)", name, session["user_id"])
+
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("board.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

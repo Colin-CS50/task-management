@@ -1,9 +1,16 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Home
+  Home
 {% endblock %}
 
 {% block main %}
-<p>{{ username }}</p>
+  <p>{{ username }}</p>
+  {% if boards %}
+    <ol>
+      {% for board in boards %}
+        <li class="text-start"><a href="/">{{ board["id"] }}: {{ board["name"] }}</a></li>
+      {% endfor %}
+    </ol>
+  {% endif %}
 {% endblock %}
