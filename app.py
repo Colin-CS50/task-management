@@ -54,6 +54,7 @@ def board_detail(id):
 
 
 @app.route("/board/<int:id>/delete", methods=["POST"])
+@login_required
 def board_delete(id):
     if "user_id" not in session:
         return redirect(url_for("login"))
@@ -82,7 +83,31 @@ def column_create():
         return abort(403, description="Must provide a name")
 
     db.execute("INSERT INTO columns (name, board_id) VALUES (?, ?)", name, board_id)
-    return redirect(url_for('boards', board_id=board_id))
+    return redirect(url_for('board_detail', id=board_id))
+
+
+@app.route("/column/delete", methods=["POST"])
+@login_required
+def column_delete():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+
+    column_id = request.form.get("column_id")
+    board_id = request.form.get("board_id")
+
+    if not column_id or not board_id:
+        return abort(400, description="Column ID and Board ID are required")
+
+    # Delete tasks associated with the column
+    db.execute("DELETE FROM tasks WHERE column_id = ?", (column_id,))
+
+    # Delete the column itself
+    db.execute("DELETE FROM columns WHERE id = ? AND board_id = ? AND board_id IN (SELECT id FROM boards WHERE id = ? AND user_id = ?)",
+               column_id, board_id, board_id, user_id)
+
+    return redirect(url_for('board_detail', id=board_id))
 
 
 @app.route("/column/<int:column_id>", methods=["GET"])

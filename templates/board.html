@@ -1,24 +1,41 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block title %} Board {% endblock %} {% block main
+%} {% if board %}
+<h1>{{ board["name"] }}</h1>
+<p>Board ID: {{ board['id'] }}</p>
 
-{% block title %}
-Board
-{% endblock %}
-
-{% block main %}
-  {% if board %}
-    {{ board["name"] }} {{ board['id'] }}
-    <form action="/column/create" method="post">
-      <h1>Add a Column</h1>
-      <div class="mb-3">
-        <input type="hidden" name="board_id" value="{{ board['id'] }}">
-        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="name" placeholder="Name" type="text">
-      </div>
-      <button class="btn btn-primary" type="submit">Create</button>
-    </form>
-  {% endif %}
-  {% if columns %}
-    {% for column in columns %}
-      <li class="text-start"><a href="{{ url_for('column_detail', column_id=column.id) }}">{{ column["name"] }}</a></li>
-    {% endfor %}
-  {% endif %}
-{% endblock %}
+<form action="{{ url_for('column_create') }}" method="post">
+  <h2>Add a Column</h2>
+  <div class="mb-3">
+    <input type="hidden" name="board_id" value="{{ board.id }}" />
+    <input
+      autocomplete="off"
+      autofocus
+      class="form-control mx-auto w-auto"
+      name="name"
+      placeholder="Name"
+      type="text"
+      required
+    />
+  </div>
+  <button class="btn btn-primary" type="submit">Create</button>
+</form>
+{% endif %} {% if columns %}
+<ul>
+  {% for column in columns %}
+  <li class="text-start">
+    <a href="{{ url_for('column_detail', column_id=column.id) }}"
+      >{{ column["name"] }}</a
+    >
+  </li>
+  <form
+    action="{{ url_for('column_delete') }}"
+    method="post"
+    style="display: inline"
+  >
+    <input type="hidden" name="column_id" value="{{ column.id }}" />
+    <input type="hidden" name="board_id" value="{{ board.id }}" />
+    <button type="submit" class="btn btn-danger">Delete Column</button>
+  </form>
+  {% endfor %}
+</ul>
+{% endif %} {% endblock %}
